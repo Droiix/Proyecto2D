@@ -588,6 +588,8 @@ MonoBehaviour:
   confineToCameraY: 1
   cameraTopMargin: 1
   cameraBottomMargin: 0.4
+  difficultyGapScale: 1
+  difficultyEnemyBonus: 0
 --- !u!1 &446339410 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7362882796615096029, guid: e5b6305c41fad4a1ebc8e06143b39aa8, type: 3}
@@ -1462,6 +1464,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 446339415}
+  generator: {fileID: 437692050}
   scoreText: {fileID: 1419203489}
   levelText: {fileID: 1835278363}
   coinsText: {fileID: 903524489}
@@ -1476,6 +1479,13 @@ MonoBehaviour:
   - 1
   - 1
   levelSpeedStep: 0.2
+  enemyBonusStep: 0.12
+  gapScaleStep: 0.12
+  backgroundRenderer: {fileID: 1969605409}
+  levelBackgrounds:
+  - {fileID: -1955448553306655712, guid: 041355406d85c4a8a84bb06d05326e6c, type: 3}
+  - {fileID: -5128491468472638631, guid: 09ea8b5216c824dd592eb74856dea224, type: 3}
+  - {fileID: 1821479297380797354, guid: fa8fee2859e644dfa82c537fda728713, type: 3}
 --- !u!4 &981659417
 Transform:
   m_ObjectHideFlags: 0

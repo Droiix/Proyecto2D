@@ -3,15 +3,12 @@ using System.Collections.Generic;
 
 public class PlatformGeneratorSmart2D : MonoBehaviour
 {
-    [Header("Referencias")]
     [SerializeField] private Transform player;
     [SerializeField] private Transform initialPlatform;
     [SerializeField] private GameObject plataforma;
 
-    [Header("Capa de suelo (para raycast)")]
     [SerializeField] private LayerMask groundLayer = 1 << 0;
 
-    [Header("Spawns SOBRE la plataforma")]
     [SerializeField] private bool spawnCoins = true;
     [SerializeField] private GameObject moneda;
     [Range(0f, 1f)][SerializeField] private float coinChance = 0.6f;
@@ -23,27 +20,22 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
     [Range(0f, 1f)][SerializeField] private float enemyChance = 0.35f;
     [SerializeField] private float enemyExtraLift = 0.02f;
 
-    [Header("Alcance")]
     [SerializeField] private float spawnAheadDistance = 30f;
     [SerializeField] private float cleanupBehindDistance = 35f;
     [SerializeField] private float startBuffer = 1.2f;
 
-    [Header("Auto desde el jugador")]
     [SerializeField] private bool autoTuneFromPlayer = true;
 
-    [Header("Manual (si apagas auto)")]
     [SerializeField] private float minGap = 3.0f;
     [SerializeField] private float maxGap = 6.0f;
     [SerializeField] private float maxStepUp = 1.2f;
     [SerializeField] private float maxStepDown = 2.0f;
 
-    [Header("Banda vertical relativa a la plataforma inicial")]
     [SerializeField] private float bandBelow = 0.4f;
     [SerializeField] private float bandAbove = 1.6f;
     [SerializeField] private float verticalBias = 0.6f;
     [SerializeField] private bool alignToIntY = true;
 
-    [Header("Limitar por cámara")]
     [SerializeField] private bool confineToCameraY = true;
     [SerializeField] private float cameraTopMargin = 1.0f;
     [SerializeField] private float cameraBottomMargin = 0.4f;
@@ -53,6 +45,9 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
     readonly List<GameObject> spawned = new();
     Camera cam;
 
+    [HideInInspector] public float difficultyGapScale = 1f;
+    [HideInInspector] public float difficultyEnemyBonus = 0f;
+
     void Awake()
     {
         if (!player && GameManager.Instance) player = GameManager.Instance.GetPlayer();
@@ -61,11 +56,7 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
 
     void Start()
     {
-        if (!initialPlatform || !plataforma)
-        {
-            Debug.LogError("[PlatformGeneratorSmart2D] Falta initialPlatform / plataforma.");
-            enabled = false; return;
-        }
+        if (!initialPlatform || !plataforma) { enabled = false; return; }
 
         if (autoTuneFromPlayer) AutoTune();
         else { tunedMinGap = minGap; tunedMaxGap = maxGap; tunedStepUp = maxStepUp; tunedStepDown = maxStepDown; }
@@ -105,7 +96,7 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
 
         while (lastSpawnX < targetX)
         {
-            float gap = Random.Range(tunedMinGap, tunedMaxGap);
+            float gap = Random.Range(tunedMinGap, tunedMaxGap) * Mathf.Max(0.5f, difficultyGapScale);
             float nextX = lastSpawnX + gap;
 
             float rawY = lastY + Random.Range(-tunedStepDown, tunedStepUp);
@@ -130,7 +121,8 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
                 Instantiate(moneda, cpos, Quaternion.identity);
             }
 
-            if (spawnEnemies && Random.value < enemyChance)
+            float enemyProb = Mathf.Clamp01(enemyChance + difficultyEnemyBonus);
+            if (spawnEnemies && Random.value < enemyProb)
             {
                 GameObject pick = (spike && Random.value < 0.5f) ? spike : enemigo;
                 if (pick)
@@ -160,10 +152,8 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
     {
         var rend = prefab.GetComponentInChildren<Renderer>();
         if (rend) return rend.bounds.extents.y;
-
         var col = prefab.GetComponentInChildren<Collider2D>();
         if (col) return col.bounds.extents.y;
-
         return 0.5f;
     }
 
@@ -199,5 +189,11 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
     {
         var r = t.GetComponentInChildren<Renderer>();
         return r ? r.bounds.max.x : t.position.x;
+    }
+
+    public void SetDifficulty(float gapScale, float enemyBonus)
+    {
+        difficultyGapScale = gapScale;
+        difficultyEnemyBonus = enemyBonus;
     }
 }

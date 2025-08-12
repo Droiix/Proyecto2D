@@ -12,7 +12,6 @@ public class Bullet : MonoBehaviour
     Rigidbody2D rb;
 
     void Awake() { rb = GetComponent<Rigidbody2D>(); }
-
     void OnEnable() { Invoke(nameof(Despawn), lifetime); }
 
     public void SetDirection(Vector2 dir)
@@ -21,25 +20,29 @@ public class Bullet : MonoBehaviour
         if (direction.x < 0) transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
     }
 
-    void FixedUpdate()
-    {
-        rb.linearVelocity = direction * speed; // <-- Unity 6
-    }
+    void FixedUpdate() { rb.linearVelocity = direction * speed; }
 
-    void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerEnter2D(Collider2D other) { HandleHit(other); }
+    void OnCollisionEnter2D(Collision2D col) { HandleHit(col.collider); }
+
+    void HandleHit(Collider2D other)
     {
+        if (other == null) return;
         if (other.CompareTag("Player")) return;
 
-        if (other.CompareTag("Enemy"))
+        var enemy = other.GetComponentInParent<Enemy>();
+        if (enemy)
         {
-            var e = other.GetComponent<Enemy>();
-            if (e) e.TakeDamage(damage);
+            enemy.TakeDamage(damage);
             Despawn();
             return;
         }
 
         if (other.gameObject.layer == LayerMask.NameToLayer("Ground") || other.CompareTag("Ground"))
+        {
             Despawn();
+            return;
+        }
     }
 
     void Despawn()
@@ -48,4 +51,3 @@ public class Bullet : MonoBehaviour
         Destroy(gameObject);
     }
 }
-
