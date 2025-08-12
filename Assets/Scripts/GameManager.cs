@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     [Header("Jugador")]
-    [SerializeField] private Transform player;   // arrastra tu Jugador aquí
+    [SerializeField] private Transform player;
 
     [Header("HUD (UI.Text)")]
     [SerializeField] private Text scoreText;
@@ -15,18 +15,19 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Text coinsText;
 
     [Header("Panels")]
-    [SerializeField] private GameObject menuPanel;           // Panel inicial con botón Play
-    [SerializeField] private GameObject levelCompletePanel;  // Botón Continuar
-    [SerializeField] private GameObject gameCompletedPanel;  // Botón Reiniciar
-    [SerializeField] private GameObject gameOverPanel;       // Botón Reiniciar
+    [SerializeField] private GameObject menuPanel;
+    [SerializeField] private GameObject levelCompletePanel;
+    [SerializeField] private GameObject gameCompletedPanel;
+    [SerializeField] private GameObject gameOverPanel;
 
     [Header("Configuración de niveles (monedas objetivo)")]
-    [SerializeField] private int[] coinTargets = new int[] { 10, 15, 25 };
+    [SerializeField] private int[] coinTargets = new int[] { 5, 10, 15 };
     [SerializeField] private int currentLevelIndex = 0;
 
-    [Header("Velocidad por nivel (opcional)")]
-    [Tooltip("Multiplicador de velocidad que se aplicará a tu baseSpeed por nivel. Si está vacío o de tamaño distinto, se asume 1 en todos.")]
-    [SerializeField] private float[] speedMultipliers = new float[] { 1f, 1f, 1f };
+    [Header("Velocidad por nivel")]
+    [SerializeField] private float[] speedMultipliers = new float[] { 1f, 1.2f, 1.4f };
+    [Range(0f, 1f)]
+    [SerializeField] private float levelSpeedStep = 0.15f;
 
     public int Score { get; private set; } = 0;
     public int CoinsCollectedThisLevel { get; private set; } = 0;
@@ -37,11 +38,14 @@ public class GameManager : MonoBehaviour
     bool isPlaying = false;
     bool isPlayerDead = false;
 
+    float playerBaseSpeed0 = -1f;
+
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-        Time.timeScale = 0f; // arrancamos en pausa (menú)
+        Time.timeScale = 0f;
+        CacheAndApplyPlayerSpeed();
     }
 
     void Start()
@@ -60,6 +64,7 @@ public class GameManager : MonoBehaviour
         isPlaying = true;
         isPlayerDead = false;
         Time.timeScale = 1f;
+        CacheAndApplyPlayerSpeed();
         SafeSet(menuPanel, false);
         SafeSet(gameOverPanel, false);
         UpdateHUD();
@@ -103,6 +108,7 @@ public class GameManager : MonoBehaviour
         isPlayerDead = false;
         Time.timeScale = 1f;
         SafeSet(levelCompletePanel, false);
+        CacheAndApplyPlayerSpeed();
         UpdateHUD();
     }
 
@@ -113,9 +119,6 @@ public class GameManager : MonoBehaviour
         if (coinsText) coinsText.text = $"COINS: {CoinsCollectedThisLevel}/{CurrentTarget}";
     }
 
-    // ======= Métodos que pide tu PlayerController =======
-
-    // Devuelve la velocidad a usar por el jugador según el nivel
     public float GetPlayerSpeed(float baseSpeed)
     {
         float mult = 1f;
@@ -124,10 +127,13 @@ public class GameManager : MonoBehaviour
             int i = Mathf.Clamp(currentLevelIndex, 0, speedMultipliers.Length - 1);
             mult = speedMultipliers[i] <= 0 ? 1f : speedMultipliers[i];
         }
+        else
+        {
+            mult = 1f + Mathf.Max(0f, levelSpeedStep) * currentLevelIndex;
+        }
         return baseSpeed * mult;
     }
 
-    // Llamado cuando el jugador muere
     public void OnPlayerDied()
     {
         if (isPlayerDead) return;
@@ -137,7 +143,15 @@ public class GameManager : MonoBehaviour
         SafeSet(gameOverPanel, true);
     }
 
-    // Accesos para otros scripts
     public Transform GetPlayer() => player;
     public bool IsPlaying() => isPlaying && !isPlayerDead;
+
+    void CacheAndApplyPlayerSpeed()
+    {
+        if (!player) return;
+        var pc = player.GetComponent<PlayerController>();
+        if (!pc) return;
+        if (playerBaseSpeed0 < 0f) playerBaseSpeed0 = pc.baseSpeed;
+        pc.baseSpeed = GetPlayerSpeed(playerBaseSpeed0);
+    }
 }

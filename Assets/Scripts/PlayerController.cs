@@ -27,6 +27,12 @@ public class PlayerController : MonoBehaviour
     public float fireRate = 6f;
     float nextFireTime;
 
+    [Header("Límites dinámicos por cámara")]
+    public bool limitByCamera = true;
+    public float topMargin = 0.12f;
+    public float bottomMargin = 0.3f;
+
+
     Rigidbody2D rb;
     bool isGrounded, isDead;
     float targetSpeed;
@@ -76,6 +82,31 @@ public class PlayerController : MonoBehaviour
         // Muerte por caída
         if (useYKill && transform.position.y < yKillHeight)
             Die();
+
+        if (limitByCamera)
+        {
+            var cam = Camera.main;
+            if (cam)
+            {
+                float halfH = cam.orthographicSize;
+                float topY = cam.transform.position.y + halfH - topMargin;
+                float bottomY = cam.transform.position.y - halfH + bottomMargin;
+
+                // techo suave: si se pasa, lo clavamos al borde y frenamos su velocidad vertical ascendente
+                if (transform.position.y > topY)
+                {
+                    transform.position = new Vector3(transform.position.x, topY, transform.position.z);
+                    if (rb.linearVelocityY > 0f) rb.linearVelocityY = 0f;
+                }
+
+                // (opcional) suelo visible: evita que salga de cámara por abajo sin caer a una FallZone
+                if (transform.position.y < bottomY)
+                {
+                    transform.position = new Vector3(transform.position.x, bottomY, transform.position.z);
+                    if (rb.linearVelocityY < 0f) rb.linearVelocityY = 0f;
+                }
+            }
+        }
     }
 
     void Shoot()
