@@ -34,7 +34,8 @@ public class Enemy : MonoBehaviour
     {
         dying = true;
         foreach (var c in cols) if (c) c.enabled = false;
-        if (rb) { rb.linearVelocity = Vector2.zero; rb.isKinematic = true; rb.simulated = false; }
+        if (rb) { rb.linearVelocity = Vector2.zero; rb.bodyType = RigidbodyType2D.Kinematic; rb.simulated = false; }
+
 
         Color[] start = new Color[rends.Length];
         for (int i = 0; i < rends.Length; i++) if (rends[i]) start[i] = rends[i].color;

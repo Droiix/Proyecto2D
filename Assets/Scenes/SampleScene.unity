@@ -1444,6 +1444,7 @@ GameObject:
   m_Component:
   - component: {fileID: 981659417}
   - component: {fileID: 981659416}
+  - component: {fileID: 981659418}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1464,7 +1465,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 446339415}
-  generator: {fileID: 437692050}
   scoreText: {fileID: 1419203489}
   levelText: {fileID: 1835278363}
   coinsText: {fileID: 903524489}
@@ -1478,14 +1478,16 @@ MonoBehaviour:
   - 1
   - 1
   - 1
-  levelSpeedStep: 0.2
-  enemyBonusStep: 0.12
-  gapScaleStep: 0.12
   backgroundRenderer: {fileID: 1969605409}
   levelBackgrounds:
   - {fileID: -1955448553306655712, guid: 041355406d85c4a8a84bb06d05326e6c, type: 3}
   - {fileID: -5128491468472638631, guid: 09ea8b5216c824dd592eb74856dea224, type: 3}
   - {fileID: 1821479297380797354, guid: fa8fee2859e644dfa82c537fda728713, type: 3}
+  musicSource: {fileID: 981659418}
+  levelMusic: []
+  musicVolume: 0.6
+  gameOverClip: {fileID: 8300000, guid: ca74f0fcdaabf44a98c0b16ad5f48554, type: 3}
+  sfxVolume: 1
 --- !u!4 &981659417
 Transform:
   m_ObjectHideFlags: 0
@@ -1501,6 +1503,103 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!82 &981659418
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 981659415}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: d0a9005554a73443f8798d28736c64c4, type: 3}
+  m_Resource: {fileID: 8300000, guid: d0a9005554a73443f8798d28736c64c4, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1143657656
 GameObject:
   m_ObjectHideFlags: 0
@@ -2921,6 +3020,10 @@ PrefabInstance:
       value: Moneda
       objectReference: {fileID: 0}
     - target: {fileID: 7275513604155911338, guid: 4c69b94a52ec64f8ba424d447a4e6e07, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7275513604155911338, guid: 4c69b94a52ec64f8ba424d447a4e6e07, type: 3}
       propertyPath: m_TagString
       value: Coin
       objectReference: {fileID: 0}
@@ -3120,6 +3223,10 @@ PrefabInstance:
     - target: {fileID: 4259922074054468571, guid: 61b96af0b8e0449cda269ed8ceb51116, type: 3}
       propertyPath: m_Layer
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5012131979186084459, guid: 61b96af0b8e0449cda269ed8ceb51116, type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -6,28 +6,37 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
+    [Header("Jugador")]
     [SerializeField] private Transform player;
-    [SerializeField] private PlatformGeneratorSmart2D generator;
 
+    [Header("HUD (UI.Text)")]
     [SerializeField] private Text scoreText;
     [SerializeField] private Text levelText;
     [SerializeField] private Text coinsText;
 
+    [Header("Panels")]
     [SerializeField] private GameObject menuPanel;
     [SerializeField] private GameObject levelCompletePanel;
     [SerializeField] private GameObject gameCompletedPanel;
     [SerializeField] private GameObject gameOverPanel;
 
+    [Header("Configuración de niveles (monedas objetivo)")]
     [SerializeField] private int[] coinTargets = new int[] { 10, 15, 25 };
     [SerializeField] private int currentLevelIndex = 0;
 
-    [SerializeField] private float[] speedMultipliers = new float[] { 1f, 1.2f, 1.4f };
-    [SerializeField, Range(0f, 1f)] private float levelSpeedStep = 0.15f;
-    [SerializeField, Range(0f, 1f)] private float enemyBonusStep = 0.12f;
-    [SerializeField] private float gapScaleStep = 0.12f;
+    [Header("Velocidad por nivel (opcional)")]
+    [SerializeField] private float[] speedMultipliers = new float[] { 1f, 1f, 1f };
 
+    [Header("Fondo por nivel")]
     [SerializeField] private SpriteRenderer backgroundRenderer;
     [SerializeField] private Sprite[] levelBackgrounds;
+
+    [Header("Audio")]
+    [SerializeField] private AudioSource musicSource;
+    [SerializeField] private AudioClip[] levelMusic;
+    [SerializeField, Range(0f, 1f)] private float musicVolume = 0.6f;
+    [SerializeField] private AudioClip gameOverClip;
+    [SerializeField, Range(0f, 1f)] private float sfxVolume = 1f;
 
     public int Score { get; private set; } = 0;
     public int CoinsCollectedThisLevel { get; private set; } = 0;
@@ -37,16 +46,16 @@ public class GameManager : MonoBehaviour
 
     bool isPlaying = false;
     bool isPlayerDead = false;
-    float playerBaseSpeed0 = -1f;
 
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        if (!musicSource) musicSource = GetComponent<AudioSource>();
         Time.timeScale = 0f;
-        CacheAndApplyPlayerSpeed();
-        ApplyDifficulty();
         ApplyBackground();
+        ApplyMusic();
+        UpdateHUD();
     }
 
     void Start()
@@ -55,7 +64,6 @@ public class GameManager : MonoBehaviour
         SafeSet(levelCompletePanel, false);
         SafeSet(gameCompletedPanel, false);
         SafeSet(gameOverPanel, false);
-        UpdateHUD();
     }
 
     void SafeSet(GameObject go, bool on) { if (go) go.SetActive(on); }
@@ -65,11 +73,10 @@ public class GameManager : MonoBehaviour
         isPlaying = true;
         isPlayerDead = false;
         Time.timeScale = 1f;
-        CacheAndApplyPlayerSpeed();
-        ApplyDifficulty();
-        ApplyBackground();
         SafeSet(menuPanel, false);
         SafeSet(gameOverPanel, false);
+        ApplyBackground();
+        ApplyMusic();
         UpdateHUD();
     }
 
@@ -92,8 +99,10 @@ public class GameManager : MonoBehaviour
     {
         isPlaying = false;
         Time.timeScale = 0f;
-        if (currentLevelIndex < coinTargets.Length - 1) SafeSet(levelCompletePanel, true);
-        else SafeSet(gameCompletedPanel, true);
+        if (currentLevelIndex < coinTargets.Length - 1)
+            SafeSet(levelCompletePanel, true);
+        else
+            SafeSet(gameCompletedPanel, true);
     }
 
     public void NextLevel()
@@ -104,9 +113,8 @@ public class GameManager : MonoBehaviour
         isPlayerDead = false;
         Time.timeScale = 1f;
         SafeSet(levelCompletePanel, false);
-        CacheAndApplyPlayerSpeed();
-        ApplyDifficulty();
         ApplyBackground();
+        ApplyMusic();
         UpdateHUD();
     }
 
@@ -125,10 +133,6 @@ public class GameManager : MonoBehaviour
             int i = Mathf.Clamp(currentLevelIndex, 0, speedMultipliers.Length - 1);
             mult = speedMultipliers[i] <= 0 ? 1f : speedMultipliers[i];
         }
-        else
-        {
-            mult = 1f + Mathf.Max(0f, levelSpeedStep) * currentLevelIndex;
-        }
         return baseSpeed * mult;
     }
 
@@ -137,6 +141,11 @@ public class GameManager : MonoBehaviour
         if (isPlayerDead) return;
         isPlayerDead = true;
         isPlaying = false;
+
+        if (musicSource && musicSource.isPlaying) musicSource.Stop();
+        if (musicSource && gameOverClip) musicSource.PlayOneShot(gameOverClip, sfxVolume);
+        else if (gameOverClip) AudioSource.PlayClipAtPoint(gameOverClip, Camera.main ? Camera.main.transform.position : Vector3.zero, sfxVolume);
+
         Time.timeScale = 0f;
         SafeSet(gameOverPanel, true);
     }
@@ -144,27 +153,30 @@ public class GameManager : MonoBehaviour
     public Transform GetPlayer() => player;
     public bool IsPlaying() => isPlaying && !isPlayerDead;
 
-    void CacheAndApplyPlayerSpeed()
-    {
-        if (!player) return;
-        var pc = player.GetComponent<PlayerController>();
-        if (!pc) return;
-        if (playerBaseSpeed0 < 0f) playerBaseSpeed0 = pc.baseSpeed;
-        pc.baseSpeed = GetPlayerSpeed(playerBaseSpeed0);
-    }
-
-    void ApplyDifficulty()
-    {
-        if (!generator) return;
-        float gapScale = 1f + Mathf.Max(0f, gapScaleStep) * currentLevelIndex;
-        float enemyBonus = Mathf.Clamp01(enemyBonusStep * currentLevelIndex);
-        generator.SetDifficulty(gapScale, enemyBonus);
-    }
-
     void ApplyBackground()
     {
         if (!backgroundRenderer || levelBackgrounds == null || levelBackgrounds.Length == 0) return;
         int i = Mathf.Clamp(currentLevelIndex, 0, levelBackgrounds.Length - 1);
         if (levelBackgrounds[i]) backgroundRenderer.sprite = levelBackgrounds[i];
+    }
+
+    void ApplyMusic()
+    {
+        if (!musicSource) return;
+        musicSource.volume = musicVolume;
+        AudioClip clip = null;
+        if (levelMusic != null && levelMusic.Length > 0)
+        {
+            int i = Mathf.Clamp(currentLevelIndex, 0, levelMusic.Length - 1);
+            clip = levelMusic[i];
+        }
+        if (!clip) clip = musicSource.clip;
+        if (!clip) return;
+        if (musicSource.clip != clip) musicSource.clip = clip;
+        if (!musicSource.isPlaying)
+        {
+            musicSource.loop = true;
+            musicSource.Play();
+        }
     }
 }

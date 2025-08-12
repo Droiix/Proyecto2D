@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1613194529091737679}
   - component: {fileID: 5012131979186084459}
   - component: {fileID: 5012762451870851001}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plataforma
   m_TagString: Ground
   m_Icon: {fileID: 0}
@@ -76,7 +76,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 5766548593978449095, guid: b3c92e364d2734ab4bdb08ca94b213d7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
