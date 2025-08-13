@@ -1,9 +1,13 @@
 using UnityEngine;
-
+// Scripts para la cámara que sigue al jugador en un juego 2D
+// Permite suavizado, zona muerta vertical, límites y look-ahead
+// También soporta un modo estilo Mario donde la cámara no sigue en Y
 public class CameraFollow2D : MonoBehaviour
 {
     [Header("Target")]
+    // El objeto que la cámara seguirá (normalmente el jugador)
     public Transform target;
+    // Desplazamiento de la cámara respecto al objetivo
     public Vector2 offset = new Vector2(0f, 0f);
 
     [Header("Suavizado")]
@@ -36,7 +40,8 @@ public class CameraFollow2D : MonoBehaviour
         // Guardamos la Y inicial para el modo bloqueado
         lockedY = transform.position.y;
     }
-
+    // Actualiza la posición de la cámara cada frame
+    // Utiliza SmoothDamp para suavizar el movimiento y look-ahead para anticipar
     void LateUpdate()
     {
         if (!target) return;
