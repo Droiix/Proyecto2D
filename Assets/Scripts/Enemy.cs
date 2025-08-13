@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections;
-
+// enemigo que el jugador puede matar
+// se destruye al recibir daño y puede hacer daño al jugador
+// se desvanece y reduce de tamaño al morir
 public class Enemy : MonoBehaviour
 {
     public int maxHealth = 1;
@@ -13,7 +15,8 @@ public class Enemy : MonoBehaviour
     Rigidbody2D rb;
     SpriteRenderer[] rends;
     Vector3 startScale;
-
+    // Inicializa el enemigo, asigna componentes y escala inicial
+    // Configura la salud inicial y los componentes necesarios
     void Awake()
     {
         currentHealth = maxHealth;
@@ -22,7 +25,8 @@ public class Enemy : MonoBehaviour
         rends = GetComponentsInChildren<SpriteRenderer>(true);
         startScale = transform.localScale;
     }
-
+    // Aplica daño al enemigo, si la salud llega a 0, inicia el proceso de muerte
+    // Desactiva colisionadores y Rigidbody, desvanece el sprite y reduce el
     public void TakeDamage(int dmg)
     {
         if (dying) return;
@@ -59,7 +63,8 @@ public class Enemy : MonoBehaviour
         }
         Destroy(gameObject);
     }
-
+    // Detecta colisiones con balas o al jugador
+    // Si colisiona con una bala, aplica daño y destruye la bala
     void OnCollisionEnter2D(Collision2D other)
     {
         if (dying) return;
@@ -73,7 +78,8 @@ public class Enemy : MonoBehaviour
             if (p) p.Die();
         }
     }
-
+    // Detecta colisiones con el jugador o balas
+    // Si colisiona con el jugador, lo mata
     void OnTriggerEnter2D(Collider2D other)
     {
         if (dying) return;
