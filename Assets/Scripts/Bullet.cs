@@ -2,10 +2,16 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Collider2D))]
+//Scripts para las balas del jugador
+// y enemigos, que se encargan de moverse, detectar colisiones y aplicar daño.
+// Las balas se destruyen después de un tiempo o al colisionar con un enemigo
 public class Bullet : MonoBehaviour
 {
+    // Velocidad de la bala, tiempo de vida y daño que inflige
     public float speed = 12f;
+    // Tiempo de vida de la bala antes de ser destruida
     public float lifetime = 2f;
+    // Daño que inflige la bala al enemigo
     public int damage = 1;
 
     Vector2 direction = Vector2.right;
