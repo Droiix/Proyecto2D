@@ -1,6 +1,8 @@
 using System.Collections;
 using UnityEngine;
 
+// Item para spawn en 2D, con opciones de configuración para ritmo, 
+//confinamiento a cámara, ajuste a suelo, validación de solapes y distancia al jugador.
 public class ItemSpawner2D : MonoBehaviour
 {
     [Header("Prefabs (1 o más)")]
@@ -12,7 +14,7 @@ public class ItemSpawner2D : MonoBehaviour
 
     [Header("Marco de cámara")]
     public bool confineToCamera = true;
-    public float cameraXInset = 1.0f;     // margen lateral dentro del frame
+    public float cameraXInset = 1.0f;
 
     [Header("Ajuste a suelo")]
     public LayerMask groundLayer;
@@ -61,6 +63,7 @@ public class ItemSpawner2D : MonoBehaviour
         }
     }
 
+    // Llamado manual para forzar un spawn inmediato
     void TrySpawnOne()
     {
         if (itemPrefabs == null || itemPrefabs.Length == 0) { if (logReasons) Debug.LogWarning("[ItemSpawner2D] Sin prefabs."); return; }
@@ -93,15 +96,15 @@ public class ItemSpawner2D : MonoBehaviour
             rayStartY = transform.position.y + 10f;
         }
 
-        // Raycast hacia abajo para apoyar en plataforma (groundLayer debe ser Ground)
+        // Raycast hacia abajo para encontrar el suelo
         RaycastHit2D hit = Physics2D.Raycast(new Vector2(x, rayStartY), Vector2.down, maxRaycastDown, groundLayer);
         if (!hit) { if (logReasons) Debug.Log("[ItemSpawner2D] Sin suelo debajo en groundLayer."); return; }
 
-        // Elegir prefab
+        // Seleccionar prefab aleatorio
         GameObject pick = itemPrefabs[Random.Range(0, itemPrefabs.Length)];
         if (!pick) { if (logReasons) Debug.Log("[ItemSpawner2D] Prefab nulo."); return; }
 
-        // Altura automática usando el collider del prefab
+        // Ajustar posición de spawn
         float autoYOffset = 0.1f;
         var col = pick.GetComponentInChildren<Collider2D>();
         if (col != null) autoYOffset = Mathf.Max(0.05f, col.bounds.extents.y);
