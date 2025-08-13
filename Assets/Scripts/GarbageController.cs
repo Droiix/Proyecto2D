@@ -7,8 +7,8 @@ public class GarbageController : MonoBehaviour
         if (!t) return true;
         var root = t.root;
         if (root.CompareTag("Player")) return true;
-        if (root.CompareTag("InitialPlatform")) return true; // pon este tag a tu plataforma fija
-        if (root.GetComponent<GameManager>()) return true;
+        if (root.CompareTag("InitialPlatform")) return true; // Plataforma inicial
+        if (root.GetComponent<GameManager>()) return true; 
         if (root.GetComponent<PlatformGeneratorSmart2D>()) return true;
         return false;
     }
@@ -17,14 +17,14 @@ public class GarbageController : MonoBehaviour
     {
         var root = t.root;
 
-        // Tags que pediste
+        // Tags qur comparan con los objetos que no se deben destruir
         if (root.CompareTag("Coin")) return true;
         if (root.CompareTag("Enemy")) return true;
 
-        // Extras útiles
+        
         if (root.GetComponent<Bullet>()) return true;
 
-        // Plataformas generadas
+        // Plataformas para evitar que se destruyan
         if (root.name.Contains("(Clone)") &&
             root.gameObject.layer == LayerMask.NameToLayer("Ground") &&
             root.GetComponentInChildren<BoxCollider2D>() != null) return true;
@@ -32,6 +32,7 @@ public class GarbageController : MonoBehaviour
         return false;
     }
 
+    // Detecta colisiones con objetos que no deben ser destruidos
     void OnTriggerEnter2D(Collider2D c)
     {
         var target = c.attachedRigidbody ? c.attachedRigidbody.transform : c.transform;
