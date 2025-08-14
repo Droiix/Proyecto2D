@@ -2,6 +2,8 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Collider2D))]
+
+//Descripción: Controlador del jugador con movimiento, salto, disparo y detección de colisiones.
 public class PlayerController : MonoBehaviour
 {
     [Header("Movimiento")]
@@ -53,33 +55,33 @@ public class PlayerController : MonoBehaviour
     {
         if (isDead) return;
 
-        // Detección de suelo
+        //Detección de suelo
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
         animator.SetBool("isJumping", !isGrounded);
 
-        // Input horizontal
+        //Input horizontal
         float x = Input.GetAxisRaw("Horizontal");
         rb.linearVelocityX = x * targetSpeed;             // <-- Unity 6
         animator.SetFloat("Speed", Mathf.Abs(rb.linearVelocityX));
 
-        // Flip visual
+        //Flip visual
         if (x != 0) spriteRenderer.flipX = x < 0;
 
-        // Salto
+        //Salto
         if (isGrounded && (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)))
         {
             rb.linearVelocityY = 0f;                      // reset vertical antes del impulso
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }
 
-        // Disparo (J o click izq)
+        //Disparo (J o click izq)
         if ((Input.GetKey(KeyCode.J) || Input.GetMouseButton(0)) && Time.time >= nextFireTime)
         {
             nextFireTime = Time.time + (1f / fireRate);
             Shoot();
         }
 
-        // Muerte por caída
+        //Muerte por caída
         if (useYKill && transform.position.y < yKillHeight)
             Die();
 
@@ -92,14 +94,14 @@ public class PlayerController : MonoBehaviour
                 float topY = cam.transform.position.y + halfH - topMargin;
                 float bottomY = cam.transform.position.y - halfH + bottomMargin;
 
-                // techo suave: si se pasa, lo clavamos al borde y frenamos su velocidad vertical ascendente
+                //Techo suave: si se pasa, lo clavamos al borde y frenamos su velocidad vertical ascendente
                 if (transform.position.y > topY)
                 {
                     transform.position = new Vector3(transform.position.x, topY, transform.position.z);
                     if (rb.linearVelocityY > 0f) rb.linearVelocityY = 0f;
                 }
 
-                // (opcional) suelo visible: evita que salga de cámara por abajo sin caer a una FallZone
+                //Suelo visible: evita que salga de cámara por abajo sin caer a una FallZone
                 if (transform.position.y < bottomY)
                 {
                     transform.position = new Vector3(transform.position.x, bottomY, transform.position.z);
@@ -119,11 +121,11 @@ public class PlayerController : MonoBehaviour
         var bullet = b.GetComponent<Bullet>();
         if (bullet) bullet.SetDirection(dir);
 
-        // Anim de disparo si existe
+        //Anim de disparo si existe
         if (HasParam("isShooting")) { animator.SetBool("isShooting", true); Invoke(nameof(StopShootAnim), 0.12f); }
         else if (HasParam("Shoot")) { animator.SetTrigger("Shoot"); }
 
-        // Evitar choque con el propio jugador
+        //Evitar choque con el propio jugador
         var myCol = GetComponent<Collider2D>();
         var bCol = b.GetComponent<Collider2D>();
         if (myCol && bCol) Physics2D.IgnoreCollision(myCol, bCol, true);
@@ -135,8 +137,10 @@ public class PlayerController : MonoBehaviour
         return false;
     }
 
+    //Animación de disparo
     void StopShootAnim() { if (animator) animator.SetBool("isShooting", false); }
 
+    //Colisiones con objetos
     void OnTriggerEnter2D(Collider2D other)
     {
         if (isDead) return;
@@ -144,12 +148,14 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("FallZone")) Die();
     }
 
+    //Colisiones con enemigos
     void OnCollisionEnter2D(Collision2D other)
     {
         if (isDead) return;
         if (other.collider.CompareTag("Enemy")) Die();
     }
 
+    //Muerte del jugador
     public void Die()
     {
         if (isDead) return;
