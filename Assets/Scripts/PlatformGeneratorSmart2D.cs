@@ -48,12 +48,14 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
     [HideInInspector] public float difficultyGapScale = 1f;
     [HideInInspector] public float difficultyEnemyBonus = 0f;
 
+    //Inicializar el jugador y la cámara
     void Awake()
     {
         if (!player && GameManager.Instance) player = GameManager.Instance.GetPlayer();
         cam = Camera.main;
     }
 
+    //Comprobar si la plataforma inicial y la plataforma están asignadas
     void Start()
     {
         if (!initialPlatform || !plataforma) { enabled = false; return; }
@@ -68,6 +70,7 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
         GenerateUntil((player ? player.position.x : right) + spawnAheadDistance);
     }
 
+    //Actualizar la generación de plataformas y la limpieza de plataformas
     void Update()
     {
         if (GameManager.Instance && !GameManager.Instance.IsPlaying()) return;
@@ -79,6 +82,7 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
         CleanupBehind(player.position.x - cleanupBehindDistance);
     }
 
+    //Generar plataformas hasta alcanzar la posición objetivo
     void GenerateUntil(float targetX)
     {
         float baseY = initialPlatform.position.y + verticalBias;
@@ -138,6 +142,7 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
         }
     }
 
+    //Resolver la posición Y superior en una posición X dada
     float ResolveTopYAtX(float x)
     {
         float startY = cam ? cam.transform.position.y + cam.orthographicSize + 2f
@@ -148,6 +153,7 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
         return lastY + 0.01f;
     }
 
+    //Obtener la mitad de la altura de un prefab
     float GetHalfHeight(GameObject prefab)
     {
         var rend = prefab.GetComponentInChildren<Renderer>();
@@ -157,6 +163,7 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
         return 0.5f;
     }
 
+    //Limpiar plataformas detrás de un límite X
     void CleanupBehind(float limitX)
     {
         for (int i = spawned.Count - 1; i >= 0; i--)
@@ -167,6 +174,7 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
         }
     }
 
+    //Autoajustar los parámetros de generación basados en el jugador
     void AutoTune()
     {
         float jumpForce = 12f, speed = 5f, g = Mathf.Abs(Physics2D.gravity.y);
@@ -185,12 +193,14 @@ public class PlatformGeneratorSmart2D : MonoBehaviour
         tunedStepDown = Mathf.Clamp((v * v) / (2f * g) * 0.85f + 0.6f, 1.4f, 3.5f);
     }
 
+    //Calcular el borde derecho de un transform
     float CalcRightEdge(Transform t)
     {
         var r = t.GetComponentInChildren<Renderer>();
         return r ? r.bounds.max.x : t.position.x;
     }
 
+    //Establecer la dificultad de generación de plataformas
     public void SetDifficulty(float gapScale, float enemyBonus)
     {
         difficultyGapScale = gapScale;
